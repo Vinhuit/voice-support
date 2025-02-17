@@ -1,0 +1,35 @@
+blueprint:
+  name: LLM Script for Setting Volume Level
+  description: >
+    This script is used to set the volume level of a media player based on a voice request.
+  domain: script
+  author: TheFes
+  homeassistant:
+    min_version: 2024.6.0
+  input:
+    media_player:
+      name: Media Player
+      description: The media player to set the volume level for.
+      selector:
+        entity:
+          filter:
+            integration: music_assistant
+            domain: media_player
+          multiple: false
+      required: true
+    volume_level:
+      name: Volume Level
+      description: The volume level to set for the media player (0.0 to 1.0)
+      selector:
+        number:
+          min: 0
+          max: 1
+          step: 0.01
+      required: true
+sequence:
+  - alias: Set volume level
+    service: media_player.volume_set
+    target:
+      entity_id: !input media_player
+    data:
+      volume_level: !input volume_level
