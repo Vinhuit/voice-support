@@ -1,5 +1,5 @@
 blueprint:
-  name: LLM Script for Music Assistant voice requests with Volume Control
+  name: LLM Script for Music Assistant voice requests
   source_url: https://github.com/music-assistant/voice-support/blob/main/llm-script-blueprint/llm_voice_script.yaml
   description: >
     This script is used to play music based on a voice request and adjust the volume of the device. Use the parameters as described in the description of each parameter.
@@ -47,6 +47,15 @@ blueprint:
               custom_value: false
               sort: false
           default: Use player settings
+        volume_level:
+          name: Volume Level
+          description: The volume level to set for the media player (0.0 to 1.0)
+          selector:
+            number:
+              min: 0
+              max: 1
+              step: 0.01
+          required: true
     prompt_settings:
       name: Prompt settings for the LLM
       icon: mdi:robot
