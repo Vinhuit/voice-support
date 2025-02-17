@@ -396,7 +396,7 @@ sequence:
           "{{ false if play_continuously == 'Never' else play_continuously
           == 'Always' and media_type != 'radio' or 'NA' }}"
       volume_data:
-        volume_level: {{ volume_level | default('0.5', true)}}
+        volume_level: "{{ volume_level | default('0.5', true)}}"
 
   - alias: Play music using Music Assistant
     action: music_assistant.play_media
