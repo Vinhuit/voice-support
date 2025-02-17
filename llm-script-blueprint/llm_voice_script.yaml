@@ -328,6 +328,15 @@ fields:
         multiple: true
     name: Media Player
     description: !input media_player_prompt
+  volume_level:
+    selector:
+      number:
+        min: 0
+        max: 1
+        step: 0.01
+    name: Volume Level
+    description: The volume level to set for the media player (0.0 to 1.0)
+    required: true  
 sequence:
   - variables:
       version: 20250128
@@ -381,4 +390,11 @@ sequence:
     action: music_assistant.play_media
     data: "{{ dict(action_data.items() | rejectattr('1', 'eq', 'NA')) }}"
     target: "{{ dict(target_data.items() | rejectattr('1', 'eq', 'NA')) }}"
+  - alias: Set volume level
+    service: media_player.volume_set
+    target:
+      entity_id: "{{ target_data.entity_id }}"
+    data:
+      volume_level: !input volume_level  
   - sequence: !input actions
+  
