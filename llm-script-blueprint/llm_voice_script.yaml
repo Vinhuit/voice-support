@@ -124,6 +124,14 @@ blueprint:
         LLM (model).  In most cases the defaults should be fine.
       collapsed: true
       input:
+        volume_level_promt:
+          name: "Volume Level Prompt"
+          description: "The volume level to set (0.0 to 1.0)."
+          selector:
+            number:
+              min: 0
+              max: 1            
+          default: 0.5    
         media_type_prompt:
           name: Media Type Prompt
           description: The prompt that the LLM will use to provide the media_type.
@@ -268,16 +276,7 @@ blueprint:
           selector:
             action: {}
           default: []
-    volume_level_promt:
-      name: "Volume Level"
-      description: "The volume level to set (0.0 to 1.0)."
-      selector:
-        number:
-          min: 0
-          max: 1
-          step: 0.01
-          mode: slider
-      default: 0.5    
+    
 mode: parallel
 max_exceeded: silent
 description:
@@ -343,14 +342,13 @@ fields:
       number:
         min: 0
         max: 1
-        step: 0.01
     name: Volume Level
     description: !input volume_level_promt 
 sequence:
   - variables:
       version: 20250128
       default_player: !input default_player
-      volume_level: 
+      target_level: 
         volume_level: !input volume_level
       player_data: "{% set ma = integration_entities('music_assistant') %}
 
@@ -400,10 +398,9 @@ sequence:
   - alias: Play music using Music Assistant
     action: music_assistant.play_media
     data: "{{ dict(action_data.items() | rejectattr('1', 'eq', 'NA')) }}"
-    target: "{{ dict(target_data.items() | rejectattr('1', 'eq', 'NA')) }}"
-  
+    target: "{{ dict(target_data.items() | rejectattr('1', 'eq', 'NA')) }}"  
   - service: media_player.volume_set
     target: !input default_player
-    data: !input volume_level    
+    data: !input target_level    
   - sequence: !input actions
   
