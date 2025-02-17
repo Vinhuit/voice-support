@@ -71,22 +71,7 @@ blueprint:
   author: TheFes
   homeassistant:
     min_version: 2024.6.0
-  input:
-    entity_id:
-      name: "Media Player"
-      description: "The media player to set the volume for."
-      selector:
-        entity:
-          domain: media_player
-    volume_level:
-      name: "Volume Level"
-      description: "The volume level to set (0.0 to 1.0)."
-      selector:
-        number:
-          min: 0
-          max: 1
-          step: 0.01
-          mode: slider
+  input:    
     music_assistant_settings:
       name: Settings for Music Assistant playback
       icon: mdi:music
@@ -179,6 +164,15 @@ blueprint:
             of a specific track if the user mentions it while requesting to play a
             specific song. If the artist is unknown or there are multiple artists
             requested, use an empty string.'
+        volume_prompt:
+          name: volume Prompt
+          description: The prompt that the LLM will use to provide the volume.
+          selector:
+            text:
+              multiline: true
+              multiple: false
+          default:
+            'volume_level is the volume level at which the music should be played.use float value between 0 and 1'    
         album_prompt:
           name: Album Prompt
           description: The prompt that the LLM will use to provide the album.
@@ -309,6 +303,12 @@ fields:
     name: Artist
     description: !input artist_prompt
     required: true
+  volume_level:
+    selector:
+      text:
+    name: volume
+    description: !input volume_prompt 
+    required: false  
   album:
     selector:
       text:
@@ -394,16 +394,18 @@ sequence:
         album: "{{ album | default('NA', true) }}"
         radio_mode:
           "{{ false if play_continuously == 'Never' else play_continuously
-          == 'Always' and media_type != 'radio' or 'NA' }}"       
+          == 'Always' and media_type != 'radio' or 'NA' }}"
+      volume_data:
+        volume_level: {{ volume_level | default('0.5', true)}}
+
   - alias: Play music using Music Assistant
     action: music_assistant.play_media
     data: "{{ dict(action_data.items() | rejectattr('1', 'eq', 'NA')) }}"
     target: "{{ dict(target_data.items() | rejectattr('1', 'eq', 'NA')) }}"  
 
-  - service: media_player.volume_set
-    target:
-      entity_id: !input entity_id
-    data:
-      volume_level: !input volume_level  
+  - alias: Play music using Music Assistant
+    action: media_player.volume_set
+    data: "{{ dict(volume_data.items() }}"
+    target: "{{ dict(target_data.items() | rejectattr('1', 'eq', 'NA')) }}"    
   - sequence: !input actions
   
