@@ -349,6 +349,7 @@ sequence:
   - variables:
       version: 20250128
       default_player: !input default_player
+      volume_level: !input volume_level
       player_data: "{% set ma = integration_entities('music_assistant') %}
 
         {% set ma_names = ma | map('state_attr', 'friendly_name') | list %}
@@ -400,8 +401,7 @@ sequence:
     target: "{{ dict(target_data.items() | rejectattr('1', 'eq', 'NA')) }}"
   
   - service: media_player.volume_set
-    target:
-      entity_id: !input entity_id
+    target: !input default_player
     data:
       volume_level: !input volume_level    
   - sequence: !input actions
