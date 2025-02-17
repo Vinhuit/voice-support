@@ -7,193 +7,25 @@ blueprint:
   homeassistant:
     min_version: 2024.6.0
   input:
-    music_assistant_settings:
-      name: Settings for Music Assistant playback
-      icon: mdi:music
-      description: You can use these settings to configure how Music Assistant playback is handled.
-      input:
-        default_player:
-          name: Default Player
-          description:
-            "The default Music Assistant player which will be used if it is not
-            clear from the request in which area or on which player the request
-            should be played.
-
-            Leave empty if you do not want a default player."
-          selector:
-            entity:
-              filter:
-                - integration: music_assistant
-                  domain:
-                    - media_player
-              multiple: false
-          default:
-        play_continuously:
-          name: Radio Mode
-          description: >
-            Determines if the "radio_mode" setting should be set for the play media action.
-
-            When set to "Use player settings" it will use the "Don't stop the music" setting
-            on the Music Assistant Player.
-
-            When set to "Always" the player will continuously add new songs to
-            the playlist.
-
-            When set to "Never" the player will stop playing after the songs selected
-            by the LLM are finished.
-          selector:
-            select:
-              options:
-                - Use player settings
-                - Always
-                - Never
-              multiple: false
-              custom_value: false
-              sort: false
-          default: Use player settings
-    prompt_settings:
-      name: Prompt settings for the LLM
-      icon: mdi:robot
-      description:
-        You can use these settings to fine-tune the prompts for your specific
-        LLM (model).  In most cases the defaults should be fine.
-      collapsed: true
-      input:
-        media_type_prompt:
-          name: Media Type Prompt
-          description: The prompt that the LLM will use to provide the media_type.
-          selector:
-            text:
-              multiline: true
-              multiple: false
-          default:
-            'This argument is mandatory and must always be provided no matter
-            what!
-
-            "media_type" can only be one of 5 different values:
-
-            - "track" if the search is about a specific track or a list of tracks.
-
-            - "album" if the search is about an album or a list of albums.
-
-            - "artist" if the search is about an artist.
-
-            - "playlist" if the search specifically requests a playlist.
-
-            - "radio" if the search is a radio channel.
-
-            media_type is mandatory and must always be provided. If a request does
-            not match any of these types, for example when music from a specific
-            genre is requested, then use "track" and provide a list of matching songs
-            for the "media_id" parameter.'
-        artist_prompt:
-          name: Artist Prompt
-          description: The prompt that the LLM will use to provide the artist.
-          selector:
-            text:
-              multiline: true
-              multiple: false
-          default:
-            '"artist" is the artist the user requests to play, or the artist
-            of a specific track if the user mentions it while requesting to play a
-            specific song. If the artist is unknown or there are multiple artists
-            requested, use an empty string.'
-        album_prompt:
-          name: Album Prompt
-          description: The prompt that the LLM will use to provide the album.
-          selector:
-            text:
-              multiline: true
-              multiple: false
-          default:
-            '"album" is the album the user requests to play, or the album a
-            specific track is from if the user mentions it when requesting to play
-            a specific song. If the album is unknown or there are multiple albums
-            requested, use an empty string.'
-        media_id_prompt:
-          name: Media ID Prompt
-          description: The prompt that the LLM will use to provide the media_id.
-          selector:
-            text:
-              multiline: true
-              multiple: false
-          default:
-            'This argument is mandatory and must always be provided no matter
-            what!
-
-            media_id is the most specific from track, album, and artist.
-
-            "track" and "artist" can be a single value or multiple values.
-
-            - If the search is about a track: Then media_id is the track name or a
-            list of track names (use a semicolon as separator). If there are
-            multiple artists in the result, use both the artist name and song name
-            separated by a dash as track name (example: "Artist name - Song name").
-            If all songs are from the same artist, use the artist for the "artist"
-            parameter, and only use the song names as track name.
-
-            - If the search is about an album: Then media_id is the album name or
-            a list of album names (use a semicolon as separator).
-
-            - If the search is about an artist: Then media_id is the artist name.
-
-            - If the search is a specific playlist: Then media_id is the requested
-            playlist without the word playlist at the start or end (example: instead of
-            "Favorite Songs playlist" return "Favorite Songs").
-
-            - If the search is a radio channel: Then media_id is the requested channel.
-
-            This is a mandatory argument and must always be provided.'
-        media_description_prompt:
-          name: Media Description Prompt
-          description: "The prompt that the LLM will use to provide the media description."
-          selector:
-            text:
-              multiline: true
-              multiple: false
-          default:
-            'The "media_description" key is used to describe the media which will
-            be played. This can be taken from the voice command query, but it should be
-            only the part which is relevant for the media. So if the voice request is
-            "Play the best Queen songs on the living room player" the value for
-            "media_description" should be "the best Queen songs"'
-        area_prompt:
-          name: Area Prompt
-          description: The prompt that the LLM will use to provide the area.
-          selector:
-            text:
-              multiline: true
-              multiple: false
-          default:
-            'The area or areas for which the music is requested. If the request
-            does not mention a target (either an area or a player), use the area
-            the request comes from.
-
-            If the area can not be determined from the request, or the device
-            the request comes from, do not use this parameter.
-
-            Only use both the "area" parameter and the "media_player" parameter together
-            if both are specifically used in the request.'
-        media_player_prompt:
-          name: Media Player Prompt
-          description: The prompt that the LLM will use to provide the media player.
-          selector:
-            text:
-              multiline: true
-              multiple: false
-          default:
-            'Only use "media_player" if the request specifically mentions a media player or
-            multiple media players on which to play the music. This has to be the entity_id
-            of a media player provided by the Music Assistant integration.
-
-            Only use both the "area" parameter and the "media_player" parameter together
-            if both are specifically used in the request.'
-    addition_conditions_actions:  
-mode: parallel
-max_exceeded: silent
-description: "voice command to set volume level of a media player"
-fields:
     media_player:
+      name: Media Player
+      description: The media player to set the volume level for.
+      selector:
+        entity:
+          filter:
+            integration: music_assistant
+            domain: media_player
+          multiple: false
+    volume_level:
+      name: Volume Level
+      description: The volume level to set for the media player (0.0 to 1.0)
+      selector:
+        number:
+          min: 0
+          max: 1
+          step: 0.01
+fields:
+  media_player:
     selector:
       entity:
         filter:
@@ -201,16 +33,15 @@ fields:
           domain: media_player
         multiple: true
     name: Media Player
-    description: !input media_player_prompt
-    volume_level:
-      selector:
-        number:
-          min: 0
-          max: 1
-          step: 0.01
-      name: Volume Level
-      description: The volume level to set for the media player (0.0 to 1.0)
-      required: true  
+    description: The media player to set the volume level for.
+  volume_level:
+    selector:
+      number:
+        min: 0
+        max: 1
+        step: 0.01
+    name: Volume Level
+    description: The volume level to set for the media player (0.0 to 1.0)
 sequence:
   - alias: Set volume level
     service: media_player.volume_set
