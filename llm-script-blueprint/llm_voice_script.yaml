@@ -276,7 +276,8 @@ blueprint:
           min: 0
           max: 1
           step: 0.01
-          mode: slider    
+          mode: slider
+      default: 0.5    
 mode: parallel
 max_exceeded: silent
 description:
@@ -349,7 +350,8 @@ sequence:
   - variables:
       version: 20250128
       default_player: !input default_player
-      volume_level: !input volume_level
+      volume_level: 
+        volume_level: !input volume_level
       player_data: "{% set ma = integration_entities('music_assistant') %}
 
         {% set ma_names = ma | map('state_attr', 'friendly_name') | list %}
@@ -402,7 +404,6 @@ sequence:
   
   - service: media_player.volume_set
     target: !input default_player
-    data:
-      volume_level: !input volume_level    
+    data: !input volume_level    
   - sequence: !input actions
   
